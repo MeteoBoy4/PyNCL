@@ -20,7 +20,9 @@ power_scale = math.ceil(math.log(scale,10.))
 FillOn = True
 LinesOn = False
 LabelsOn = False
-Sym_color = True
+Sym_color = False
+Set_contour_levels= True
+contour_levels = [8, -8, 2] # The maximum, minimum and spacing respectively
 Shorts	= True
 levels_exist = False
 
@@ -130,6 +132,13 @@ if Sym_color:
 	f.write("""
 	symMinMaxPlt({variable_slice},13,False,cnres)
 """.format(variable_slice=variable_slice_0))
+if Set_contour_levels:
+	f.write("""
+	cnres@cnLevelSelectionMode="ManualLevels"
+	cnres@cnMaxLevelValF={max}
+	cnres@cnMinLevelValF={min}
+	cnres@cnLevelSpacingF={spacing}
+""".format(max=contour_levels[0], min=contour_levels[1], spacing=contour_levels[2]))
 
 f.write("""
 	map=gsn_csm_contour_map(wks, {variable_slice}, cnres)
@@ -178,6 +187,14 @@ if Sym_color:
 	f.write("""
 		symMinMaxPlt({variable_slice},13, False,cnres)
 """.format(variable_slice=variable_slice_n))
+if Set_contour_levels:
+	f.write("""
+		cnres@cnLevelSelectionMode="ManualLevels"
+		cnres@cnMaxLevelValF={max}
+		cnres@cnMinLevelValF={min}
+		cnres@cnLevelSpacingF={spacing}
+""".format(max=contour_levels[0], min=contour_levels[1], spacing=contour_levels[2]))
+
 
 f.write("""
 		map=gsn_csm_contour_map(wks, {variable_slice},cnres)
