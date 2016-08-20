@@ -2,26 +2,34 @@
 
 import math
 
-level = 500
-pname = "pv"
+level = 300
+pname = "div"
 fmt	  = "ps"
 lllat = -10.
 lllon = 20.
 urlat = 60.
 urlon = 160.
 topo_line = 1500.
-input_directory = "/run/media/MeteoBoy4/Data/MData/ERA-Interim/2013/PV/"
+input_directory = "/run/media/MeteoBoy4/Data/MData/ERA-Interim/2005/div/jan/upmonth/"
 background_directory = "/run/media/MeteoBoy4/Data/MData/ERA-Interim/Surface_GeoP/"
-input_file = "PV500.nc"
-variable_name = "pv"
-variable_standard_name = "Potential Vorticity"
-scale = 1e6
+input_file = "300hpa.nc"
+variable_name = "d"
+variable_standard_name = "Diversion"
+scale = 1e5
 power_scale = math.ceil(math.log(scale,10.))
 FillOn = True
 LinesOn = False
 LabelsOn = False
-Sym_color = False
+Sym_color = True
 Shorts	= True
+levels_exist = False
+
+if levels_exist:
+	variable_slice_0 = 'variable(0, {lev}, {lllat:urlat}, {lllon:urlon}))'
+	variable_slice_n = 'variable(nmo, {lev}, {lllat:urlat}, {lllon:urlon}))'
+else:
+	variable_slice_0 = 'variable(0, {lllat:urlat}, {lllon:urlon}))'
+	variable_slice_n = 'variable(nmo, {lllat:urlat}, {lllon:urlon}))'
 
 
 f = open('contour.ncl','w')
@@ -107,7 +115,7 @@ f.write("""
 	cnres@cnLineLabelsOn={Label}
 
 	cnres@gsnLeftString=""
-""".format(Fill=FillOn,Lines=LinesOn,Label=LabelsOn))
+""".format(Fill=FillOn, Lines=LinesOn, Label=LabelsOn))
 
 if scale:
 	f.write("""
@@ -120,12 +128,12 @@ else:
 
 if Sym_color:
 	f.write("""
-	symMinMaxPlt(variable(0,{lev},{lllat:urlat},{lllon:urlon}),12,False,cnres)
-""")
+	symMinMaxPlt({variable_slice},12,False,cnres)
+""".format(variable_slice=variable_slice_0))
 
 f.write("""
-	map=gsn_csm_contour_map(wks,variable(0,{lev},{lllat:urlat},{lllon:urlon}),cnres)
-""")
+	map=gsn_csm_contour_map(wks, {variable_slice}, cnres)
+""".format(variable_slice=variable_slice_0))
 
 f.write("""
 	tpres=True
@@ -168,18 +176,18 @@ f.write("""
 
 if Sym_color:
 	f.write("""
-		symMinMaxPlt(variable(nmo,{lev},{lllat:urlat},{lllon:urlon}),12,False,cnres)
-""")
+		symMinMaxPlt({variable_slice},12,False,cnres)
+""".format(variable_slice=variable_slice_n))
 
 f.write("""
-		map=gsn_csm_contour_map(wks,variable(nmo,{lev},{lllat:urlat},{lllon:urlon}),cnres)
-		map2=gsn_csm_contour(wks,z({lllat:urlat},{lllon:urlon}),tpres)
+		map=gsn_csm_contour_map(wks, {variable_slice},cnres)
+		map2=gsn_csm_contour(wks,z({{lllat:urlat}},{{lllon:urlon}}),tpres)
 		overlay(map,map2)
 
 		draw(map)
 		frame(wks)
 	end do
-""")
+""".format(variable_slice=variable_slice_n))
 
 f.write("""
 	delete(variable)
