@@ -25,11 +25,11 @@ Shorts	= True
 levels_exist = False
 
 if levels_exist:
-	variable_slice_0 = 'variable(0, {lev}, {lllat:urlat}, {lllon:urlon}))'
-	variable_slice_n = 'variable(nmo, {lev}, {lllat:urlat}, {lllon:urlon}))'
+	variable_slice_0 = 'variable(0, {lev}, {lllat:urlat}, {lllon:urlon})'
+	variable_slice_n = 'variable(nmo, {lev}, {lllat:urlat}, {lllon:urlon})'
 else:
-	variable_slice_0 = 'variable(0, {lllat:urlat}, {lllon:urlon}))'
-	variable_slice_n = 'variable(nmo, {lllat:urlat}, {lllon:urlon}))'
+	variable_slice_0 = 'variable(0, {lllat:urlat}, {lllon:urlon})'
+	variable_slice_n = 'variable(nmo, {lllat:urlat}, {lllon:urlon})'
 
 
 f = open('contour.ncl','w')
@@ -128,7 +128,7 @@ else:
 
 if Sym_color:
 	f.write("""
-	symMinMaxPlt({variable_slice},12,False,cnres)
+	symMinMaxPlt({variable_slice},13,False,cnres)
 """.format(variable_slice=variable_slice_0))
 
 f.write("""
@@ -170,13 +170,13 @@ f.write("""
 	nmos=ntime
 	do nmo=1,nmos-1
 		month=nmo+1
-		tpres@tiMainString="{standard} on "+tostring(lev)+" hPa in "+month+"th month (climatology)"
+		tpres@tiMainString="{standard} on "+tostring(lev)+" hPa in "+month+"th time (climatology)"
 		tpres@tiMainFontHeightF=0.015
 """.format(standard=variable_standard_name))
 
 if Sym_color:
 	f.write("""
-		symMinMaxPlt({variable_slice},12,False,cnres)
+		symMinMaxPlt({variable_slice},13, False,cnres)
 """.format(variable_slice=variable_slice_n))
 
 f.write("""
