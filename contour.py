@@ -13,7 +13,8 @@ input_directory = "/run/media/MeteoBoy4/Data/MData/ERA-Interim/2005/div/jan/upmo
 background_directory = "/run/media/MeteoBoy4/Data/MData/ERA-Interim/Surface_GeoP/"
 input_file = "300hpa.nc"
 variable_name = "d"
-variable_standard_name = "Diversion"
+variable_standard_name = "Divergence"
+Scale = True
 scale = 1e5
 power_scale = math.ceil(math.log(scale,10.))
 FillOn = True
@@ -45,6 +46,7 @@ f.write("""load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_code.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/contributed.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/gsn_csm.ncl"
 load "$NCARG_ROOT/lib/ncarg/nclscripts/csm/shea_util.ncl"
+load "$NCARG_ROOT/lib/ncarg/nclscripts/contrib/cd_string.ncl"
 
 begin
 ;------Define constants and parameters
@@ -82,11 +84,12 @@ if Shorts:
 else:
 	f.write('      	variable = Vfile->{vari}'.format(vari=variable_name))
 
-if scale:
+if Scale:
 	f.write("""
 	variable = variable*{scale}""".format(scale=scale))
 
 f.write("""
+	time = Vfile->time
 	printVarSummary(variable)
 	z=short2flt(ofile->z(0,:,:))
 	lsdata=maskf->LSMASK
@@ -128,16 +131,8 @@ f.write("""
 	cnres@cnLineLabelsOn={Label}
 
 	cnres@gsnLeftString=""
+	cnres@gsnRightString=""
 """.format(Fill=FillOn, Lines=LinesOn, Label=LabelsOn))
-
-if scale:
-	f.write("""
-	cnres@gsnRightString="10~S~-{power}~N~"+variable@units
-""".format(power=int(power_scale)))
-else:
-	f.write("""
-	cnres@gsnRightString=variable@units
-""")
 
 if Sym_color:
 	f.write("""
@@ -178,8 +173,21 @@ f.write("""
 	tpres@gsnPaperOrientation="portrait"
 
 	tpres@tiMainFontHeightF=0.015
-	tpres@tiMainString="{standard} on "+tostring(lev)+" layer in 1th time "
+""".format(topo=topo_line))
 
+if Scale:
+    f.write("""
+	tpres@tiMainString="{standard}"+tostring(lev)+" (10~S~-{power}~N~"+variable@units+")"+"     "+cd_string(time(0), \\
+					"%H%MUTC %d%c %Y")
+	""".format(standard=variable_standard_name, power=int(power_scale)))
+else:
+    f.write("""
+	tpres@tiMainString="{standard}"+tostring(lev)+" ("+variable@units+")"+"     "+cd_string(time(0), \\
+						"%H%MUTC %d%c %Y")
+		""".format(standard=variable_standard_name))
+
+
+f.write("""
 	map2=gsn_csm_contour(wks,z({{zlllat:zurlat}},{{zlllon:zurlon}}),tpres)
 	overlay(map,map2)
 	draw(map)
