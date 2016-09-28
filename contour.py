@@ -9,7 +9,6 @@ lllat = -10.
 lllon = 20.
 urlat = 60.
 urlon = 160.
-topo_line = 1500.
 input_directory = "/run/media/MeteoBoy4/Data/MData/ERA-Interim/2005/div/jan/upmonth/"
 background_directory = "/run/media/MeteoBoy4/Data/MData/ERA-Interim/Surface_GeoP/"
 input_file = "300hpa.nc"
@@ -22,9 +21,15 @@ LinesOn = False
 LabelsOn = False
 Sym_color = False
 Set_contour_levels= True
-contour_levels = [8, -8, 2] # The maximum, minimum and spacing respectively
+contour_levels = [8, -8, 1] # The maximum, minimum and spacing, respectively
 Shorts	= True
 levels_exist = False
+
+topo_line = 2000.
+zlllat = 20.
+zlllon = 60.
+zurlat = 45.
+zurlon = 110.
 
 if levels_exist:
 	variable_slice_0 = 'variable(0, {lev}, {lllat:urlat}, {lllon:urlon})'
@@ -54,7 +59,13 @@ f.write("""
 	lllon   = {lllon}
 	urlat   = {urlat}
 	urlon   = {urlon}
-""".format(lev=level,pname=pname,fmt=fmt,lllat=lllat,lllon=lllon,urlat=urlat,urlon=urlon))
+
+	zlllat   = {zlllat}
+	zlllon   = {zlllon}
+	zurlat   = {zurlat}
+	zurlon   = {zurlon}
+""".format(lev=level,pname=pname,fmt=fmt,lllat=lllat,lllon=lllon,urlat=urlat,urlon=urlon,
+		zlllat=zlllat,zlllon=zlllon,zurlat=zurlat,zurlon=zurlon))
 
 f.write("""
 ;------Read the data from ncfile and some other support data
@@ -151,10 +162,10 @@ f.write("""
 	tpres@gsnLeftString=""
 	tpres@gsnRightString=""
 
-	tpres@sfXCStartV=lllon
-	tpres@sfXCEndV=urlon
-	tpres@sfYCStartV=lllat
-	tpres@sfYCEndV=urlat
+	tpres@sfXCStartV=zlllon
+	tpres@sfXCEndV=zurlon
+	tpres@sfYCStartV=zlllat
+	tpres@sfYCEndV=zurlat
 
 	tpres@cnLineLabelsOn=False
 	tpres@cnInfoLabelOn=False
@@ -167,9 +178,9 @@ f.write("""
 	tpres@gsnPaperOrientation="portrait"
 
 	tpres@tiMainFontHeightF=0.015
-	tpres@tiMainString="{standard} on "+tostring(lev)+" hPa in 1th month (climatology)"
+	tpres@tiMainString="{standard} on "+tostring(lev)+" layer in 1th time "
 
-	map2=gsn_csm_contour(wks,z({{lllat:urlat}},{{lllon:urlon}}),tpres)
+	map2=gsn_csm_contour(wks,z({{zlllat:zurlat}},{{zlllon:zurlon}}),tpres)
 	overlay(map,map2)
 	draw(map)
 	frame(wks)
@@ -179,7 +190,7 @@ f.write("""
 	nmos=ntime
 	do nmo=1,nmos-1
 		month=nmo+1
-		tpres@tiMainString="{standard} on "+tostring(lev)+" hPa in "+month+"th time (climatology)"
+		tpres@tiMainString="{standard} on "+tostring(lev)+" layer in "+month+"th time "
 		tpres@tiMainFontHeightF=0.015
 """.format(standard=variable_standard_name))
 
@@ -198,7 +209,7 @@ if Set_contour_levels:
 
 f.write("""
 		map=gsn_csm_contour_map(wks, {variable_slice},cnres)
-		map2=gsn_csm_contour(wks,z({{lllat:urlat}},{{lllon:urlon}}),tpres)
+		map2=gsn_csm_contour(wks,z({{zlllat:zurlat}},{{zlllon:zurlon}}),tpres)
 		overlay(map,map2)
 
 		draw(map)
