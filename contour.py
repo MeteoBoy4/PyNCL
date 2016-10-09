@@ -194,13 +194,24 @@ f.write("""
 	frame(wks)
 """.format(topo=topo_line,standard=variable_standard_name))
 
-f.write("""
-	nmos=ntime
-	do nmo=1,nmos-1
-		month=nmo+1
-		tpres@tiMainString="{standard} on "+tostring(lev)+" layer in "+month+"th time "
-		tpres@tiMainFontHeightF=0.015
-""".format(standard=variable_standard_name))
+if Scale:
+	f.write("""
+		nmos=ntime
+		do nmo=1,nmos-1
+			month=nmo+1
+			tpres@tiMainString="{standard}"+tostring(lev)+" (10~S~-{power}~N~"+variable@units+")"+"     "+cd_string(time(nmo), \\
+							"%H%MUTC %d%c %Y")
+			tpres@tiMainFontHeightF=0.015
+	""".format(standard=variable_standard_name, power=int(power_scale)))
+else:
+	f.write("""
+		nmos=ntime
+		do nmo=1,nmos-1
+			month=nmo+1
+			tpres@tiMainString="{standard}"+tostring(lev)+" ("+variable@units+")"+"     "+cd_string(time(nmo), \\
+								"%H%MUTC %d%c %Y")
+			tpres@tiMainFontHeightF=0.015
+	""".format(standard=variable_standard_name))
 
 if Sym_color:
 	f.write("""
