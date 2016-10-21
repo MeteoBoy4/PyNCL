@@ -47,6 +47,7 @@ class Contour(object):
             self.variable_slice_0 = 'variable(0, {lllat:urlat}, {lllon:urlon})'
             self.variable_slice_n = 'variable(nmo, {lllat:urlat}, {lllon:urlon})'
 
+    def script_creator(self):
         self.script = open('contour.ncl', 'w')
 
     def header(self):
@@ -257,6 +258,7 @@ ofile = addfile(dirbac+"Surface_GeoP.nc","r")
 
 
     def output_script(self):
+        self.script_creator()
         self.header()
         self.parameter_define()
         self.variable_reader()
