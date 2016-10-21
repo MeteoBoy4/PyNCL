@@ -4,7 +4,7 @@ import math
 
 
 class Contour(object):
-    def __init__(self, **kwargs):
+    def __init__(self, inputs, **kwargs):
         prop_defaults = {
             "levels_exist": False,
             "level": 300,
@@ -14,9 +14,7 @@ class Contour(object):
             "lllon": 20.,
             "urlat": 60.,
             "urlon": 160.,
-            "input_directory": None,
             "background_directory": "/run/media/MeteoBoy4/Data/MData/ERA-Interim/Surface_GeoP/",
-            "input_file": None,
             "variable_name": "d",
             "variable_standard_name": "Divergence",
             "Scale": True,
@@ -37,6 +35,8 @@ class Contour(object):
 
         for (prop, default) in prop_defaults.iteritems():
             setattr(self, prop, kwargs.get(prop, default))
+
+        self.input = inputs
 
         self.power_scale = math.ceil(math.log(self.scale, 10.))
 
@@ -81,14 +81,14 @@ begin
 
     def variable_reader(self):
         self.script.write("""
-;------Read the data from ncfile and some other support data
+;------Read the data from ncfile and some other supporting data
         dirvar   = "{dirvar}"
         dirbac   = "{dirbac}"
         maskf=addfile("$NCARG_ROOT/lib/ncarg/data/cdf/landsea.nc","r")
         system("rm -f "+pname+"."+fmt)
-        Vfile    = addfile(dirvar+"{inputf}","r")
+        Vfile    = addfile(dirvar,"r")
         ofile = addfile(dirbac+"Surface_GeoP.nc","r")
-        """.format(dirvar=self.input_directory, dirbac=self.background_directory, inputf=self.input_file))
+        """.format(dirvar=self.input, dirbac=self.background_directory))
 
         if self.Shorts:
             self.script.write('variable = short2flt(Vfile->{vari})'.format(vari=self.variable_name))
