@@ -127,8 +127,9 @@ begin
 
 end"""
 
+
 class Contour(object):
-    def __init__(self, inputs, **kwargs):
+    def __init__(self, cinput, **kwargs):
         prop_defaults = {
             "levels_exist": False,
             "level": 300,
@@ -145,7 +146,7 @@ class Contour(object):
             "Shorts": True
         }
 
-        self.input = inputs
+        self.input = cinput
         self.common = CommonPlot(**kwargs)
 
         for (prop, default) in prop_defaults.iteritems():
@@ -153,12 +154,8 @@ class Contour(object):
 
         self.power_scale = math.ceil(math.log(self.scale, 10.))
 
-        if self.levels_exist:
-            self.variable_slice_0 = 'variable(0, {lev}, {lllat:urlat}, {lllon:urlon})'
-            self.variable_slice_n = 'variable(nmo, {lev}, {lllat:urlat}, {lllon:urlon})'
-        else:
-            self.variable_slice_0 = 'variable(0, {lllat:urlat}, {lllon:urlon})'
-            self.variable_slice_n = 'variable(nmo, {lllat:urlat}, {lllon:urlon})'
+        self.variable_slice_0 = ''
+        self.variable_slice_n = ''
 
     # def script_creator(self):
     #     self.script = open('contour.ncl', 'w')
@@ -200,6 +197,13 @@ class Contour(object):
         return self.common.orography_setter()
 
     def contour_drawer(self):
+        # Take care when scale changed beyond instance initialization
+        self.power_scale = math.ceil(math.log(self.scale, 10.))
+        if self.levels_exist:
+            self.variable_slice_0 = 'variable(0, {lev}, {lllat:urlat}, {lllon:urlon})'
+        else:
+            self.variable_slice_0 = 'variable(0, {lllat:urlat}, {lllon:urlon})'
+
         script1 = """
 ;------Set up the map
         wks=gsn_open_wks(fmt,pname)
@@ -273,6 +277,12 @@ class Contour(object):
         return self.common.draw_frame('contourplot')
 
     def time_iterator(self):
+        # Take care when scale changed beyond instance initialization
+        if self.levels_exist:
+            self.variable_slice_n = 'variable(nmo, {lev}, {lllat:urlat}, {lllon:urlon})'
+        else:
+            self.variable_slice_n = 'variable(nmo, {lllat:urlat}, {lllon:urlon})'
+
         if self.Scale:
             self.script.write("""
         nmos=ntime
@@ -328,6 +338,22 @@ class Contour(object):
         ncl_script.write(self.deleter())
         ncl_script.write(self.terminator())
         ncl_script.close()
+
+
+class Vector(object):
+    def __init__(self, uinput, vinput, **kwargs):
+        prop_defaults = {
+            "uname" : "u",
+            "vname" : "v"
+
+        }
+
+        self.uinput = uinput
+        self.vinput = vinput
+        self.common = CommonPlot(**kwargs)
+
+        for (prop, default) in prop_defaults.iteritems():
+            setattr(self, prop, kwargs.get(prop, default))
 
 
 # class ContourWithVector(object):
